@@ -34,5 +34,11 @@ public class Arquivo {
     public ArrayList<Integer> getProcessos(){
         return processos;
     }
+
+    public String getNome() {
+        return nome;
+    }
+    
+    
     
 }
