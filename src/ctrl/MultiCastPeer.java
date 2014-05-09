@@ -7,9 +7,10 @@ import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 
 import model.Client;
-import model.ClienteSenderChave;
 import model.Processo;
 import model.Server;
+import util.Parameter;
+import util.Serializer;
 //import model.ServerRecebedorChave;
 //import util.Parameter;
 //import util.Serializer;
@@ -61,14 +62,14 @@ public class MultiCastPeer extends Thread {
         while (!socket.isClosed()) {
 
             if (this.processo.getListaProcessos().size() < 4) {
-                this.adicionarProcesso();
+                //this.adicionarProcesso();
             } else {
                 if (!processo.isClient() && !processo.isServer()) {
                     processo.eleicao();
                 }
 
                 if (processo.isServer()) {
-                    inicializarServidorUDP();
+                    //inicializarServidorUDP();
                 }
 
                 if (processo.isClient()) {
@@ -139,49 +140,49 @@ public class MultiCastPeer extends Thread {
     /**
      * Método que envia as chaves publicas aos clientes e após inicializa o servidor
      */
-    private void inicializarServidorUDP() {
+//    private void inicializarServidorUDP() {
+//
+//        if (enviaOuRecebeChave) {
+//            try {
+//                //	    		for(int i=0; i<20; i++)
+//                {
+//                    ClienteSenderChave csc = new ClienteSenderChave(jogador, jogador.getServer());
+//                    sleep(1750);
+//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(0).getId())) {
+//                        csc.enviaChavePublica(jogador.getListaJogadores().get(0).getPorta(), 0);
+//                        sleep(500);
+//                    }
+//
+//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(1).getId())) {
+//                        csc.enviaChavePublica(jogador.getListaJogadores().get(1).getPorta(), 1);
+//                        sleep(500);
+//                    }
+//
+//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(2).getId())) {
+//                        csc.enviaChavePublica(jogador.getListaJogadores().get(2).getPorta(), 2);
+//                        sleep(500);
+//                    }
+//
+//                    for (Jogador j : jogador.getListaJogadores()) {
+//                        if (!jogador.getServer().getcPublicas().containsKey(j.getId())) {
+//                            enviaOuRecebeChave = true;
+//                            break;
+//                        }
+//                    }
+//                    enviaOuRecebeChave = false;
+//                }
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        } else {
+//
+//            // começa o server udp
+//            jogador.getServer().startJogo();
+//
+//        }
 
-        if (enviaOuRecebeChave) {
-            try {
-                //	    		for(int i=0; i<20; i++)
-                {
-                    ClienteSenderChave csc = new ClienteSenderChave(jogador, jogador.getServer());
-                    sleep(1750);
-                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(0).getId())) {
-                        csc.enviaChavePublica(jogador.getListaJogadores().get(0).getPorta(), 0);
-                        sleep(500);
-                    }
-
-                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(1).getId())) {
-                        csc.enviaChavePublica(jogador.getListaJogadores().get(1).getPorta(), 1);
-                        sleep(500);
-                    }
-
-                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(2).getId())) {
-                        csc.enviaChavePublica(jogador.getListaJogadores().get(2).getPorta(), 2);
-                        sleep(500);
-                    }
-
-                    for (Jogador j : jogador.getListaJogadores()) {
-                        if (!jogador.getServer().getcPublicas().containsKey(j.getId())) {
-                            enviaOuRecebeChave = true;
-                            break;
-                        }
-                    }
-                    enviaOuRecebeChave = false;
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        } else {
-
-            // começa o server udp
-            jogador.getServer().startJogo();
-
-        }
-
-    }
+//    }
 
     /**
      * Envia uma mensagem para o grupo multicast
@@ -209,47 +210,16 @@ public class MultiCastPeer extends Thread {
         }
     }
 
-    private boolean isJogadorDaVez() {
+   
+    private void adicionarProcessos() {
         byte[] buffer = new byte[1024];
         DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, group, PORT);
         try {
-            this.enviarMensagem(jogador.sendInfo());
-            socket.receive(msgIn);
-
-            String jogadorDaVez = new String(msgIn.getData());
-
-            if (jogadorDaVez != null) {
-                if (jogadorDaVez.equalsIgnoreCase("Jogador da vez: " + jogador.getNick())) {
-                    jogador.setJogadorDaVez(true);
-                    return true;
-                }
-            }
-
-            //            Object o = Serializer.deserialize(msgIn.getData());
-            //            if (o instanceof Jogador) {
-            //                jogador.addJogador((Jogador) o);
-            //            }
-            //            sleep(1250);
-            // enviarMensagem("Recebido por " + usuario);
-        } catch (IOException e) {
-            System.out.println("Erro I/O: " + e.getLocalizedMessage());
-        } finally {
-            cleanBuffer(buffer);
-        }
-
-        jogador.setJogadorDaVez(false);
-        return false;
-    }
-
-    private void adicionarJogadores() {
-        byte[] buffer = new byte[1024];
-        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, group, PORT);
-        try {
-            this.enviarMensagem(jogador.sendInfo());
+            this.enviarMensagem(processo.sendId());
             socket.receive(msgIn);
             Object o = Serializer.deserialize(msgIn.getData());
-            if (o instanceof Jogador) {
-                jogador.addJogador((Jogador) o);
+            if (o instanceof Processo) {
+                processo.addProcesso((Processo) o);
             }
             sleep(1250);
             // enviarMensagem("Recebido por " + usuario);
@@ -262,20 +232,5 @@ public class MultiCastPeer extends Thread {
         } finally {
             cleanBuffer(buffer);
         }
-    }
-
-    public void enviarAvisoPrivadasFim(byte[] msg) {
-        for (int i = 0; i < 10; i++) {
-            DatagramPacket msgOut = new DatagramPacket(msg, msg.length, group, PORT);
-            System.out.println(new String(msg));
-            try {
-                socket.send(msgOut);
-                sleep(50);
-            } catch (IOException e) {
-                System.out.println("Erro I/O: " + e.getLocalizedMessage());
-            } catch (InterruptedException e) {
-                System.out.println("Erro InterruptedException: " + e.getLocalizedMessage());
-            }
-        }
-    }
+    }  
 }
