@@ -50,30 +50,30 @@ public class Client {
      * Método que envia via UDP uma tentativa de acerto para a Forca
      * @param msg
      */
-    public void enviarArquivo(String msg) {
-        try {
-            byte[] msgByte = Criptografia.encriptarComChavePublica(msg.getBytes(), jogador.getChavePublica());
-//            byte[] msgByte = msg.getBytes();
-            
-            DatagramPacket request = new DatagramPacket(msgByte, msgByte.length, host, port);
-            socket.send(request);
-
-        } catch (IOException ex) {
-            System.out.println("Erro Envio: " + ex.getLocalizedMessage());
-        }
-    }
-
-    
-        public void receberArquivo(String msg) {
-        try {
-            byte[] msgByte = Criptografia.encriptarComChavePublica(msg.getBytes(), jogador.getChavePublica());
-//            byte[] msgByte = msg.getBytes();
-            
-            DatagramPacket request = new DatagramPacket(msgByte, msgByte.length, host, port);
-            socket.send(request);
-
-        } catch (IOException ex) {
-            System.out.println("Erro Envio: " + ex.getLocalizedMessage());
-        }
-    }
+//    public void enviarArquivo(String msg) {
+//        try {
+//            byte[] msgByte = Criptografia.encriptarComChavePublica(msg.getBytes(), jogador.getChavePublica());
+////            byte[] msgByte = msg.getBytes();
+//            
+//            DatagramPacket request = new DatagramPacket(msgByte, msgByte.length, host, port);
+//            socket.send(request);
+//
+//        } catch (IOException ex) {
+//            System.out.println("Erro Envio: " + ex.getLocalizedMessage());
+//        }
+//    }
+//
+//    
+//        public void receberArquivo(String msg) {
+//        try {
+//            byte[] msgByte = Criptografia.encriptarComChavePublica(msg.getBytes(), jogador.getChavePublica());
+////            byte[] msgByte = msg.getBytes();
+//            
+//            DatagramPacket request = new DatagramPacket(msgByte, msgByte.length, host, port);
+//            socket.send(request);
+//
+//        } catch (IOException ex) {
+//            System.out.println("Erro Envio: " + ex.getLocalizedMessage());
+//        }
+//    }
 }

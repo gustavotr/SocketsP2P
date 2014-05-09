@@ -2,7 +2,7 @@ package listener;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import model.Jogador;
+import model.Processo;
 
 import view.GUILobby;
 import view.GUITelaInicial;
@@ -18,14 +18,14 @@ public class GUITelaInicialListener extends BaseListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Component c = (Component) e.getSource();
-        if (c.equals(panel.getButtonJogar())) {
-            String username = panel.getTextFieldNome().getText();
-            if(username == null || username.isEmpty()) {
-                panel.getLabelErro().setText("O preenchimento do nick é obrigatório");
-            } else {
-                Jogador j = new Jogador(username);
-                panel.changePanel(new GUILobby(panel.getMainFrame(), j));
-            }
-        }
+//        if (c.equals(panel.getButtonJogar())) {
+//            String username = panel.getTextFieldNome().getText();
+//            if(username == null || username.isEmpty()) {
+//                panel.getLabelErro().setText("O preenchimento do nick é obrigatório");
+//            } else {
+//                Jogador j = new Jogador(username);
+//                panel.changePanel(new GUILobby(panel.getMainFrame(), j));
+//            }
+//        }
     }
 }
