@@ -15,8 +15,9 @@ public class GUITelaInicial extends BasePanel {
 
     private static final long serialVersionUID = 1L;
     private JLabel labelErro;
-    private JButton buttonStart;
+    private JButton buttonBuscar;
     private BaseListener listener;
+    private JTextField busca;
 
     public GUITelaInicial(JFrame mainFrame) {
         super(mainFrame);
@@ -32,10 +33,10 @@ public class GUITelaInicial extends BasePanel {
      */
     private void initComponents() {
 
-        buttonStart = new JButton("Ligar PeerToPeer");
-        buttonStart.setBounds(GUIConstants.HORIZONAL_CENTER_POS, 205, GUIConstants.BASE_COMPONENT_WIDTH, GUIConstants.BASE_COMPONENT_HEIGHT);
-        buttonStart.addActionListener(listener);
-        this.add(buttonStart);
+        buttonBuscar = new JButton("Buscar");
+        buttonBuscar.setBounds(GUIConstants.HORIZONAL_CENTER_POS, 205, GUIConstants.BASE_COMPONENT_WIDTH, GUIConstants.BASE_COMPONENT_HEIGHT);
+        buttonBuscar.addActionListener(listener);
+        this.add(buttonBuscar);
 
         labelErro = new JLabel();
         labelErro.setBounds(GUIConstants.HORIZONAL_CENTER_POS, 235, GUIConstants.BASE_COMPONENT_WIDTH, GUIConstants.BASE_COMPONENT_HEIGHT);
@@ -43,8 +44,8 @@ public class GUITelaInicial extends BasePanel {
         this.add(labelErro);
     }
 
-    public JButton getButtonJogar() {
-        return buttonStart;
+    public JButton getButtonStart() {
+        return buttonBuscar;
     }
 
     public JLabel getLabelErro() {
