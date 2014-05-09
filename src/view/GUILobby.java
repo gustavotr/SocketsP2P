@@ -13,7 +13,7 @@ import javax.swing.SwingConstants;
 
 import listener.BaseListener;
 import listener.GUILobbyListener;
-import model.Jogador;
+import model.Processo;
 import util.GUIConstants;
 
 public class GUILobby extends BasePanel {
@@ -21,7 +21,7 @@ public class GUILobby extends BasePanel {
     private static final long serialVersionUID = 1L;
     private BaseListener listener;
     private JLabel labelPalavra;
-    private JLabel labelJogadorAtual;
+    private JLabel labelProcessoAtual;
     private JLabel labelTituloLetrasChutadas;
     private JLabel labelLetrasChutadas;
     private JTextField textFieldPalavra;
@@ -29,11 +29,11 @@ public class GUILobby extends BasePanel {
     private JButton buttonChutar;
     private JButton buttonEnviar;
     private JTextArea textAreaChat;
-    private Jogador jogador;
+    private Processo processo;
 
-    public GUILobby(JFrame mainFrame, Jogador jogador) {
+    public GUILobby(JFrame mainFrame, Processo processo) {
         super(mainFrame);
-        this.jogador = jogador;
+        this.processo = processo;
         listener = new GUILobbyListener(this);
         this.setSize(GUIConstants.FRAME_WIDTH, GUIConstants.FRAME_HEIGHT);
         this.setVisible(true);
@@ -48,10 +48,10 @@ public class GUILobby extends BasePanel {
         labelPalavra.setFont(new Font(null, Font.BOLD, 18));
         this.add(labelPalavra);
 
-        labelJogadorAtual = new JLabel("Jogador: "+jogador.getNick());
-        labelJogadorAtual.setBounds(10, 70, GUIConstants.FRAME_WIDTH / 2, GUIConstants.BASE_COMPONENT_HEIGHT);
-        labelJogadorAtual.setFont(new Font(null, Font.PLAIN, 10));
-        this.add(labelJogadorAtual);
+        labelProcessoAtual = new JLabel("Processo: "+processo.getId());
+        labelProcessoAtual.setBounds(10, 70, GUIConstants.FRAME_WIDTH / 2, GUIConstants.BASE_COMPONENT_HEIGHT);
+        labelProcessoAtual.setFont(new Font(null, Font.PLAIN, 10));
+        this.add(labelProcessoAtual);
 
         labelTituloLetrasChutadas = new JLabel("Letras já chutadas: ");
         labelTituloLetrasChutadas.setBounds(10, 100, GUIConstants.FRAME_WIDTH / 2, GUIConstants.BASE_COMPONENT_HEIGHT);
@@ -78,8 +78,8 @@ public class GUILobby extends BasePanel {
         return labelPalavra;
     }
 
-    public JLabel getLabelJogadorAtual() {
-        return labelJogadorAtual;
+    public JLabel getLabelProcessoAtual() {
+        return labelProcessoAtual;
     }
 
     public JLabel getLabelTituloLetrasChutadas() {
@@ -110,8 +110,8 @@ public class GUILobby extends BasePanel {
         return textAreaChat;
     }
 
-    public Jogador getJogador() {
-        return jogador;
+    public Processo getProcesso() {
+        return processo;
     }
 
 }
