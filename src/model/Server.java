@@ -55,13 +55,14 @@ public class Server {
         //criar lista de arquivos
       
         for(int p = 0; p < processos.size(); p++){
-            ArrayList<String> arqTemp = processos.get(p).getArquivos();
-            for(int i = 0; i < arqTemp.size(); i++){
-                String fileName = arqTemp.get(i);
-                if(isNewFile(fileName){  //criar metodo para verificar se o arquivo já consta na lista de arquivos
-                    arquivos.add(new Arquivo(fileName,p));
-                }else{
-                    //adiciona ao arquivo existente o numero do processo que o contem
+            ArrayList<String> arquivosDoProcesso = processos.get(p).getArquivos();
+            for(int i = 0; i < arquivosDoProcesso.size(); i++){
+                String nomeDoArquivo = arquivosDoProcesso.get(i);
+                int index = existFile(nomeDoArquivo);
+                if(index < 0){  //caso arquivo ainda não esteja na lista de arquivos ele é adicionado
+                    arquivos.add(new Arquivo(nomeDoArquivo,p));
+                }else{  //caso contrário o indice do processo que contém o arquivo é adicionado ao Arquivo
+                    arquivos.get(index).addProcesso(p);
                 }
             }
         }
@@ -384,6 +385,17 @@ public class Server {
 
     public TreeMap<Integer, PublicKey> getcPublicas() {
         return cPublicas;
+    }
+
+    //Retorna o indice do arquivo caso ele existe ou retorna -1 caso contrário
+    private int existFile(String fileName) {
+        for(int i = 0; i < arquivos.size(); i++){
+            Arquivo temp = arquivos.get(i);
+            if(temp.getNome() == fileName){
+                return i;
+            }
+        }        
+        return -1;
     }
 
 }
