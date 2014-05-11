@@ -18,7 +18,7 @@ public class GUITelaInicialListener extends BaseListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Component c = (Component) e.getSource();
-        if (c.equals(panel.getButtonJogar())) {            
+        if (c.equals(panel.getButtonStart())) {            
             Processo p = new Processo();
             panel.changePanel(new GUILobby(panel.getMainFrame(), p));            
         }
