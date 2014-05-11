@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import ctrl.MultiCastPeer;
 import java.io.File;
+import java.nio.ByteBuffer;
 
 public class Processo {
 
@@ -246,6 +247,12 @@ public class Processo {
             }
             
         return arquivos;
+    }
+
+    public byte[] sendId() {
+        byte[] byteId;
+        byteId = ByteBuffer.allocate(4).putInt(id).array();
+        return byteId;   
     }
 
 }
