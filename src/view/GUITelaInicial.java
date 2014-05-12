@@ -33,8 +33,12 @@ public class GUITelaInicial extends BasePanel {
      */
     private void initComponents() {
 
-        buttonBuscar = new JButton("Buscar");
-        buttonBuscar.setBounds(GUIConstants.HORIZONAL_CENTER_POS, 205, GUIConstants.BASE_COMPONENT_WIDTH, GUIConstants.BASE_COMPONENT_HEIGHT);
+        busca = new JTextField();
+        busca.setBounds(GUIConstants.HORIZONAL_CENTER_POS - GUIConstants.BASE_COMPONENT_WIDTH/2, GUIConstants.VERTICAL_CENTER_POS/2, GUIConstants.BASE_COMPONENT_WIDTH, GUIConstants.BASE_COMPONENT_HEIGHT);
+        this.add(busca);
+        
+        buttonBuscar = new JButton("Buscar");        
+        buttonBuscar.setBounds(GUIConstants.HORIZONAL_CENTER_POS + GUIConstants.BASE_COMPONENT_WIDTH/2, GUIConstants.VERTICAL_CENTER_POS/2, 100, GUIConstants.BASE_COMPONENT_HEIGHT);
         buttonBuscar.addActionListener(listener);
         this.add(buttonBuscar);
 
@@ -50,6 +54,10 @@ public class GUITelaInicial extends BasePanel {
 
     public JLabel getLabelErro() {
         return labelErro;
+    }
+    
+    public String getBusca(){
+        return busca.getText();
     }
 
 }

@@ -12,6 +12,7 @@ public class GUILobbyListener extends BaseListener {
 
     public GUILobbyListener(GUILobby panel) {
         this.panel = panel;
+        
     }
 
     @Override
