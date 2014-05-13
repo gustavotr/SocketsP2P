@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import model.Client;
 import model.Processo;
@@ -21,13 +22,13 @@ public class MultiCastPeer extends Thread {
     private final String HOST = "229.10.10.100";
     private final int PORT = 5050;
     private final int TIMEOUT = 20000;
-    private String usuario;
     private MulticastSocket socket;
     private InetAddress group;
     private Processo processo;
 //   private boolean isPrivateKeyReceived = false;
     private int contHelloEmMs = 0;
     private boolean isServerUp = true;
+    private ArrayList<Processo> processos;
 
 //    private boolean myTurn = false;
 //    private boolean enviaOuRecebeChave = true;
@@ -60,26 +61,25 @@ public class MultiCastPeer extends Thread {
      */
     public void run() {
         while (!socket.isClosed()) {
-
-            if (this.processo.getListaProcessos().size() < 4) {
-                //this.adicionarProcesso();
-            } else {
-                if (!processo.isClient() && !processo.isServer()) {
-                    processo.eleicao();
-                }
-
-                if (processo.isServer()) {
-                    //inicializarServidorUDP();
-                }
-
-                if (processo.isClient()) {
-                    inicializarClienteUDP();
-                }
-            }
+            
+            /// Perguntar quem é o tracker
+            /// caso não haja resposta presumir que voce é o tracker           
+            
         }
     }
 
-    
+    public InetAddress getGroup() {
+        return group;
+    }
+
+    public MulticastSocket getSocket() {
+        return socket;
+    }
+
+    public int getPORT() {
+        return PORT;
+    }
+            
     /**
      * Método que inicializa o Cliente do jogo, criando inicialmente uma conexão unicast UDP para receber a chave Publica dele.
      * 

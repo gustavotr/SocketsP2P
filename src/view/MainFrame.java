@@ -47,6 +47,5 @@ public class MainFrame extends JFrame {
 
     private void initMulticast() {
         processo = new Processo();
-        new MultiCastPeer(processo);
     }
 }
