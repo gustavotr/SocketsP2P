@@ -23,7 +23,7 @@ public class Processo {
     private String folderPath;
     private ArrayList<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
-    private Server theTracker;
+    private int theTracker;
     private boolean knowTracker = false;
     private ArrayList<Processo> processosNaRede;    
 
@@ -99,6 +99,6 @@ public class Processo {
         }
         
         knowTracker = true;
-        theTracker = new Server(getProcessosNaRede(idProcessoEleito));
+        theTracker = idProcessoEleito;
     }
 }

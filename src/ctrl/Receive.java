@@ -18,12 +18,12 @@ import java.util.logging.Logger;
 public class Receive {
     
     private MulticastSocket socket;
-    private MultiCastPeer multi;
+    private SocketP2P socketP2P;
     
-    public Receive(MultiCastPeer s) {
+    public Receive(SocketP2P s) {
         try {
-            multi = s;
-            socket = multi.getSocket();
+            socketP2P = s;
+            socket = socketP2P.getSocket();
             
             byte buf[] = new byte[1024];
             DatagramPacket pack = new DatagramPacket(buf, buf.length);
@@ -37,7 +37,7 @@ public class Receive {
             System.out.println();
             // And when we have finished receiving data leave the multicast group and
             // close the socket
-            socket.leaveGroup(multi.getGroup());
+            socket.leaveGroup(socketP2P.getGroup());
             socket.close();
         } catch (IOException ex) {
             Logger.getLogger(Receive.class.getName()).log(Level.SEVERE, null, ex);

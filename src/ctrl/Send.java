@@ -19,19 +19,20 @@ import java.util.logging.Logger;
  */
 public class Send {
     
-    private MultiCastPeer multi;
+     private MulticastSocket socket;
+    private SocketP2P socketP2P;
 
-    public Send(MultiCastPeer s) {
+    public Send(SocketP2P s) {
         try {
-            multi = s;
-            MulticastSocket socket = multi.getSocket();
+            socketP2P = s;
+            socket = socketP2P.getSocket();
             // Fill the buffer with some data
             byte buf[] = new byte[10];
             for (int i=0; i<buf.length; i++) buf[i] = (byte)i;
             // Create a DatagramPacket
             DatagramPacket pack;
             pack = new DatagramPacket(buf, buf.length,
-                    multi.getGroup(), multi.getPORT());
+                    socketP2P.getGroup(), socketP2P.getPORT());
             // Do a send. Note that send takes a byte for the ttl and not an int.
             socket.send(pack);
             // And when we have finished sending data close the socket
