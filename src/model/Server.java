@@ -44,7 +44,7 @@ public class Server {
         //criar lista de arquivos
       
         for(int p = 0; p < processos.size(); p++){
-            ArrayList<String> arquivosDoProcesso = processos.get(p).getArquivos();
+            ArrayList<String> arquivosDoProcesso = processos.get(p).getArquivosDoProcesso();
             for(int i = 0; i < arquivosDoProcesso.size(); i++){
                 String nomeDoArquivo = arquivosDoProcesso.get(i);
                 int index = existFile(nomeDoArquivo);
@@ -71,7 +71,7 @@ public class Server {
         addContLoop();
         String hello = "hello";
         if (contLoopStillAlive >= Parameter.DELTA_T1_SERVER_MANDAR_HELLO) {
-            mCast.enviarMensagem(hello.getBytes());
+            mCast.enviarMensagemMulticast(hello);
             contLoopStillAlive = 0;
         }
 

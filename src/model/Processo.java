@@ -101,4 +101,12 @@ public class Processo {
         knowTracker = true;
         theTracker = idProcessoEleito;
     }
-}
+
+    public ArrayList<String> getArquivosDoProcesso() {
+        return arquivosDoProcesso;
+    } 
+
+    public void setTheTracker(int theTracker) {
+        this.theTracker = theTracker;
+    }
+    }

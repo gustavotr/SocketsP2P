@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 public class Receive {
     
     private MulticastSocket socket;
-    private SocketP2P socketP2P;
+    private MulticastSocketP2P socketP2P;
     
-    public Receive(SocketP2P s) {
+    public Receive(MulticastSocketP2P s) {
         try {
             socketP2P = s;
             socket = socketP2P.getSocket();

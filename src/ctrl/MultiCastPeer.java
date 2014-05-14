@@ -2,11 +2,15 @@ package ctrl;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import model.Processo;
 //import model.ServerRecebedorChave;
 //import util.Parameter;
@@ -14,8 +18,8 @@ import model.Processo;
 
 public class MultiCastPeer extends Thread {
 
-    private SocketP2P socketP2P;
-    private MulticastSocket socket;
+    private MulticastSocketP2P socketP2P;
+    private int PORT = 5050;
     private Processo processo;
     private boolean received;
 //   private boolean isPrivateKeyReceived = false;
@@ -31,10 +35,14 @@ public class MultiCastPeer extends Thread {
      * @param processo Recebe o processo como parâmetro.
      */
     public MultiCastPeer(Processo processo) {
-        this.processo = processo;
-        socketP2P = new SocketP2P();
-        socket = socketP2P.getSocket();
-        this.start();
+        try {
+            this.processo = processo;
+            socketP2P = new MulticastSocketP2P(PORT);
+            this.start();
+            new Tracker(socketP2P);
+        } catch (IOException ex) {
+            Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -44,40 +52,49 @@ public class MultiCastPeer extends Thread {
      * o servidor, inicializa o server 3 - Caso o jogador seja cliente,
      * inicializa o cliente
      */
-    public void run() {
-        while (!socket.isClosed()) {
+    public void run() {        
+        while (!socketP2P.isClosed()) {
             if (!processo.knowTracker()) {
                 try {
                     /// Perguntar quem é o tracker
-                    enviarMensagem("quem e o tracker?");
+                    socketP2P.enviarMensagem("quem e o tracker?");
                     received = false;
                     while (!received) {
                         //aguarda resposta
                         byte buf[] = new byte[1024];
-                        DatagramPacket pack = new DatagramPacket(buf, buf.length);                        
-                        System.out.println("Esperando resposta");
-                        socket.receive(pack);
-                        String localIP = pack.getAddress().getHostAddress();
-                        if (!(pack.getAddress().equals(localIP))) {
+                        DatagramPacket pack = new DatagramPacket(buf, buf.length);                         
+                        System.out.println("Esperando resposta");                        
+                        socketP2P.setSoTimeout(2000);
+                        socketP2P.receive(pack);
+                        String resposta = new String(pack.getData());
+                        System.out.println("PEER RECEBEU -----> " + resposta);
+                        if (resposta.equals("eu sou o tracker")){
                             received = true;
                             // Finally, let us do something useful with the data we just received,
                             // like print it on stdout :-)
-                            System.out.println("Received data from: " + pack.getAddress().toString()
+                            System.out.println("Peer recebeu de: " + pack.getAddress().toString()
                                     + ":" + pack.getPort() + " with length: "
                                     + pack.getLength());
+                            System.out.println("Mensagem: ");
                             System.out.write(pack.getData(), 0, pack.getLength());
-                            System.out.println(pack.getAddress());
-                            System.out.println("Local: "+localIP);
                             // And when we have finished receiving data leave the multicast group and
                             // close the socket
-                            socket.leaveGroup(socketP2P.getGroup());
-                            socket.close();
+                            socketP2P.leaveGroup(socketP2P.getGroup());
+                            socketP2P.close();
                         }
                     }
                     System.out.println("FIM");
-                } catch (IOException ex) {
+                } catch (SocketTimeoutException e) {
+                    // timeout exception.
+                    System.out.println("Nenhum tracker respondeu");
+                    System.out.println("Eu serei o tracker");
+                    //processo.setTheTracker(processo.getId());                                        
+                    //socketP2P.close();
+                }catch (IOException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            }else{  //Sabe quem é o Tracker
+                
             }
         }
     }
@@ -90,10 +107,9 @@ public class MultiCastPeer extends Thread {
      */
     private boolean isServerUP() {
         byte[] buffer = new byte[1024];
-        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, socketP2P.getGroup(), socketP2P.getPORT());
+        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, socketP2P.getGroup(), socketP2P.getPort());
         try {
-            // this.enviarMensagem(jogador.sendInfo());
-            socket.receive(msgIn);            
+            socketP2P.receive(msgIn);            
             String mensagem = new String(msgIn.getData());
 
             if (mensagem.equals("hello")) {
@@ -104,23 +120,5 @@ public class MultiCastPeer extends Thread {
 
         }
         return false;
-    }
-
-    /**
-     * Envia uma mensagem para o grupo multicast
-     *
-     * @param msg
-     *
-     */
-    public void enviarMensagem(String msg) {
-        byte[] byteMsg = msg.getBytes();
-        DatagramPacket msgOut = new DatagramPacket(byteMsg, byteMsg.length, socketP2P.getGroup(), socketP2P.getPORT());
-        try {
-            socket.send(msgOut);
-            socketP2P.setLocalHost(socket.getLocalAddress().getHostAddress());
-            System.out.println("LocalHost: "+socketP2P.getLocalHost());
-        } catch (IOException e) {
-            System.out.println("Erro I/O: " + e.getLocalizedMessage());
-        }
-    }
+    }    
 }
