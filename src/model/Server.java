@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import util.Parameter;
 import ctrl.MultiCastPeer;
+import java.util.Vector;
 
 
 /**
@@ -44,7 +45,7 @@ public class Server {
         //criar lista de arquivos
       
         for(int p = 0; p < processos.size(); p++){
-            ArrayList<String> arquivosDoProcesso = processos.get(p).getArquivosDoProcesso();
+            Vector<String> arquivosDoProcesso = processos.get(p).getArquivosDoProcesso();
             for(int i = 0; i < arquivosDoProcesso.size(); i++){
                 String nomeDoArquivo = arquivosDoProcesso.get(i);
                 int index = existFile(nomeDoArquivo);

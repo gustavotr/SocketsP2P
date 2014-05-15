@@ -1,23 +1,14 @@
 package view;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 
-import javax.swing.BorderFactory;
-import javax.swing.CellRendererPane;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import listener.BaseListener;
 import listener.GUILobbyListener;
 import model.Processo;
-import util.GUIConstants;
 
 public class GUILobby extends BasePanel {
 
@@ -53,9 +44,8 @@ public class GUILobby extends BasePanel {
         buscaRealizada.setHorizontalAlignment(SwingConstants.CENTER);
         buscaRealizada.setFont(new Font(null, Font.BOLD, 18));
         this.add(buscaRealizada);
-
-        String[] data = {"one", "two", "three", "four"};
-        result = new JList<String>(data);
+        
+        result = new JList<String>(processo.getArquivosDoProcesso());
         result.setBounds(20, 100, getWidth() - 50, getHeight() - 150);
         this.add(result);
     }

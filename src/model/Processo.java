@@ -7,14 +7,11 @@
 package model;
 
 import ctrl.MultiCastPeer;
-import ctrl.MulticastSocketP2P;
 import ctrl.Tracker;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Vector;
 
 /**
  *
@@ -26,7 +23,7 @@ public class Processo {
     private boolean client = false;
     private int id;
     private String folderPath;
-    private ArrayList<String> arquivosDoProcesso;    
+    private Vector<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
     private int theTracker;
     private Tracker myTracker;
@@ -36,14 +33,13 @@ public class Processo {
     public Processo() {
         Random rnd = new Random();
         id = rnd.nextInt();
-        multi = new MultiCastPeer(this);
-        //new Tracker();
-        //this.folderPath = folderPath;
-        //setArquivos();       
+        multi = new MultiCastPeer(this);        
+        this.folderPath = "src/arquivos/processo"+(rnd.nextInt(4)+1);        
+        setArquivos();       
     }
     
     public void setArquivos(){
-        arquivosDoProcesso = new ArrayList<String>();
+        arquivosDoProcesso = new Vector<String>();
         File folder = new File(folderPath);
         File[] listOfFiles = folder.listFiles();
         
@@ -109,7 +105,7 @@ public class Processo {
         theTracker = idProcessoEleito;
     }
 
-    public ArrayList<String> getArquivosDoProcesso() {
+    public Vector<String> getArquivosDoProcesso() {
         return arquivosDoProcesso;
     } 
 
