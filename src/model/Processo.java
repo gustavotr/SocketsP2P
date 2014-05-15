@@ -24,13 +24,13 @@ public class Processo {
     private Vector<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
     private Peer tracker;    
-    private InetAddress trackerAddress;
     private boolean knowTracker;
     private Tracker myTracker;
+    private Cliente cliente;
 
     public Processo() {
         Random rnd = new Random();
-        id = rnd.nextInt(100);
+        id = 10 + rnd.nextInt(89);
         knowTracker = false;
         multi = new MultiCastPeer(this);
         this.folderPath = "src/arquivos/processo"+(rnd.nextInt(4)+1);        
@@ -64,11 +64,17 @@ public class Processo {
         return arquivosDoProcesso;
     } 
 
+    public Peer getTracker() {
+        return tracker;
+    }
+    
     public void setTheTracker(Peer peer){
         this.tracker = peer;        
         knowTracker = true;
         if(tracker.getId() == id){
             myTracker = new Tracker(id);
         }
+        
+        cliente = new Cliente(multi, this);
     }   
 }

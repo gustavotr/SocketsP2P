@@ -36,7 +36,7 @@ public class Tracker extends Thread{
      * @param id recebe um int que e o id do processo que o gerou
      */
     public Tracker(int id) {
-        try {
+        try {            
             idTracker = id;
             arquivosDoTracker = new ArrayList<>();
             multicastSocket = new MulticastSocketP2P();
@@ -55,8 +55,10 @@ public class Tracker extends Thread{
                 byte buf[] = new byte[1024];
                 DatagramPacket pack = new DatagramPacket(buf, buf.length);                
                 socketUDP.receive(pack);
-                System.out.println("Tracker recebeu uma requisicao");
-                System.out.println(new String(pack.getData()));
+                System.out.println("UNICAST <- " + new String(pack.getData()));
+                buf = "oi peer".getBytes();
+                pack = new DatagramPacket(buf, buf.length, pack.getAddress(), pack.getPort());
+                socketUDP.send(pack);
             } catch (IOException ex) {
                 Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
             }
