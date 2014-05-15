@@ -2,10 +2,6 @@ package ctrl;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +35,6 @@ public class MultiCastPeer extends Thread {
             this.processo = processo;
             socketP2P = new MulticastSocketP2P(PORT);
             this.start();
-            new Tracker(socketP2P);
         } catch (IOException ex) {
             Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -57,18 +52,18 @@ public class MultiCastPeer extends Thread {
             if (!processo.knowTracker()) {
                 try {
                     /// Perguntar quem é o tracker
-                    socketP2P.enviarMensagem("quem e o tracker?");
+                    //socketP2P.enviarMensagem("quem e o tracker?");
                     received = false;
                     while (!received) {
                         //aguarda resposta
                         byte buf[] = new byte[1024];
                         DatagramPacket pack = new DatagramPacket(buf, buf.length);                         
                         System.out.println("Esperando resposta");                        
-                        socketP2P.setSoTimeout(2000);
+                        socketP2P.setSoTimeout(5000);
                         socketP2P.receive(pack);
-                        String resposta = new String(pack.getData());
-                        System.out.println("PEER RECEBEU -----> " + resposta);
-                        if (resposta.equals("eu sou o tracker")){
+                        String resposta = new String(pack.getData());                        
+                        String respostaEsperada = to1024String("eu sou o tracker!");
+                        if (respostaEsperada.equals(resposta)){
                             received = true;
                             // Finally, let us do something useful with the data we just received,
                             // like print it on stdout :-)
@@ -77,19 +72,17 @@ public class MultiCastPeer extends Thread {
                                     + pack.getLength());
                             System.out.println("Mensagem: ");
                             System.out.write(pack.getData(), 0, pack.getLength());
+                            System.out.println(""); 
                             // And when we have finished receiving data leave the multicast group and
-                            // close the socket
-                            socketP2P.leaveGroup(socketP2P.getGroup());
-                            socketP2P.close();
+                            // close the socket                            
                         }
                     }
-                    System.out.println("FIM");
                 } catch (SocketTimeoutException e) {
                     // timeout exception.
                     System.out.println("Nenhum tracker respondeu");
                     System.out.println("Eu serei o tracker");
-                    //processo.setTheTracker(processo.getId());                                        
-                    //socketP2P.close();
+                    processo.setTheTracker(processo.getId());
+                    socketP2P.close();
                 }catch (IOException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -121,4 +114,11 @@ public class MultiCastPeer extends Thread {
         }
         return false;
     }    
+
+    private String to1024String(String str) {
+        byte[] buf = new byte[1024];
+        byte[] temp = str.getBytes();
+        System.arraycopy(temp, 0, buf, 0, temp.length);
+        return new String(buf);        
+    }
 }

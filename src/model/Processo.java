@@ -7,9 +7,14 @@
 package model;
 
 import ctrl.MultiCastPeer;
+import ctrl.MulticastSocketP2P;
+import ctrl.Tracker;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -24,6 +29,7 @@ public class Processo {
     private ArrayList<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
     private int theTracker;
+    private Tracker myTracker;
     private boolean knowTracker = false;
     private ArrayList<Processo> processosNaRede;    
 
@@ -31,6 +37,7 @@ public class Processo {
         Random rnd = new Random();
         id = rnd.nextInt();
         multi = new MultiCastPeer(this);
+        //new Tracker();
         //this.folderPath = folderPath;
         //setArquivos();       
     }
@@ -106,7 +113,10 @@ public class Processo {
         return arquivosDoProcesso;
     } 
 
-    public void setTheTracker(int theTracker) {
+    public void setTheTracker(int theTracker){
         this.theTracker = theTracker;
+        if(theTracker == id){
+            myTracker = new Tracker();
+        }
     }
     }

@@ -71,7 +71,7 @@ public class Server {
         addContLoop();
         String hello = "hello";
         if (contLoopStillAlive >= Parameter.DELTA_T1_SERVER_MANDAR_HELLO) {
-            mCast.enviarMensagemMulticast(hello);
+            //mCast.enviarMensagemMulticast(hello);
             contLoopStillAlive = 0;
         }
 

@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -50,7 +47,7 @@ public class MulticastSocketP2P extends MulticastSocket{
      * @param msg
      *
      */
-    public void enviarMensagem(String msg) {
+    public void enviarMensagem(String msg) {  
         byte[] byteMsg = msg.getBytes();
         DatagramPacket msgOut = new DatagramPacket(byteMsg, byteMsg.length, group, PORT);
         try {            
