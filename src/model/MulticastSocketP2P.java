@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ctrl;
+package model;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -33,6 +33,12 @@ public class MulticastSocketP2P extends MulticastSocket{
      * Numero da porta usada pelo multicast
      */
     public static final int MULTICAST_PORT = 5050;
+
+    public MulticastSocketP2P() throws IOException {
+        this(MULTICAST_PORT);
+    }
+    
+    
     
     public MulticastSocketP2P(int port) throws IOException {
         super(port);

@@ -6,7 +6,6 @@
 
 package model;
 
-import ctrl.MultiCastPeer;
 import ctrl.Tracker;
 import java.io.File;
 import java.net.InetAddress;
@@ -20,22 +19,20 @@ import java.util.Vector;
  */
 public class Processo {
     
-    private boolean tracker = false;
-    private boolean client = false;
     private int id;
     private String folderPath;
     private Vector<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
-    private int trackerID;
-    private Tracker myTracker;
-    private boolean knowTracker = false;
-    private ArrayList<Processo> processosNaRede;    
+    private Peer tracker;    
     private InetAddress trackerAddress;
+    private boolean knowTracker;
+    private Tracker myTracker;
 
     public Processo() {
         Random rnd = new Random();
-        id = rnd.nextInt();
-        multi = new MultiCastPeer(this);        
+        id = rnd.nextInt(100);
+        knowTracker = false;
+        multi = new MultiCastPeer(this);
         this.folderPath = "src/arquivos/processo"+(rnd.nextInt(4)+1);        
         setArquivos();       
     }
@@ -53,15 +50,11 @@ public class Processo {
                 arquivosDoProcesso.add(listOfFiles[i].getName());
             }
     }
-
+    
+    
     public int getId() {
         return id;
-    }
-
-    public InetAddress getTrackerAddress() {
-        return trackerAddress;
-    }    
-    
+    } 
            
     public boolean knowTracker(){
         return knowTracker;
@@ -71,12 +64,11 @@ public class Processo {
         return arquivosDoProcesso;
     } 
 
-    public void setTheTracker(int trackerID, InetAddress trackerAddress){
-        this.trackerID = trackerID;
-        this.trackerAddress = trackerAddress;
+    public void setTheTracker(Peer peer){
+        this.tracker = peer;        
         knowTracker = true;
-        if(trackerID == id){
+        if(tracker.getId() == id){
             myTracker = new Tracker(id);
         }
-    }
-    }
+    }   
+}

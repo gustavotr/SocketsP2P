@@ -6,6 +6,7 @@
 
 package ctrl;
 
+import model.MulticastSocketP2P;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -38,7 +39,7 @@ public class Tracker extends Thread{
         try {
             idTracker = id;
             arquivosDoTracker = new ArrayList<>();
-            multicastSocket = new MulticastSocketP2P(MulticastSocketP2P.MULTICAST_PORT);
+            multicastSocket = new MulticastSocketP2P();
             socketUDP  = new DatagramSocket(UDPPort);
             TrackerHello trackerHello = new TrackerHello();
             this.start();
@@ -62,28 +63,8 @@ public class Tracker extends Thread{
        }
         
     } 
-    
-    //    public void eleicao(){
-//        int idProcessoEleito = getProcessosNaRede().get(0).getId();
-//
-//        for (int i = 1; i < this.getProcessosNaRede().size(); i++) {
-//            if (idProcessoEleito < getProcessosNaRede().get(i).getId()) {
-//                idProcessoEleito = getProcessosNaRede().get(i).getId();
-//            }
-//        }
-//
-//        if (this.getId() == idProcessoEleito) {
-//            tracker = true;
-//            client = false;            
-//        } else {
-//            tracker = false;
-//            client = true;
-//        }
-//        
-//        knowTracker = true;
-//        trackerID = idProcessoEleito;
-//    }
-    
+   
+ 
      public class TrackerHello extends Thread{
 
         public TrackerHello() {
