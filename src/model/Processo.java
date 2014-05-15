@@ -9,6 +9,7 @@ package model;
 import ctrl.MultiCastPeer;
 import ctrl.Tracker;
 import java.io.File;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
@@ -25,10 +26,11 @@ public class Processo {
     private String folderPath;
     private Vector<String> arquivosDoProcesso;    
     private MultiCastPeer multi;
-    private int theTracker;
+    private int trackerID;
     private Tracker myTracker;
     private boolean knowTracker = false;
     private ArrayList<Processo> processosNaRede;    
+    private InetAddress trackerAddress;
 
     public Processo() {
         Random rnd = new Random();
@@ -38,6 +40,10 @@ public class Processo {
         setArquivos();       
     }
     
+    /**
+     * Procura por todos os arquivos que estão na pasta do processo
+     * e os adiciona ao Vector arquivosDoProcesso
+     */
     public void setArquivos(){
         arquivosDoProcesso = new Vector<String>();
         File folder = new File(folderPath);
@@ -48,71 +54,29 @@ public class Processo {
             }
     }
 
-    public void setIsTracker(boolean isTracker) {
-        this.tracker = isTracker;
-    }
-    
-   public boolean isTracker(){
-       return tracker;
-   }   
-
-    public ArrayList<Processo> getProcessosNaRede() {
-        return processosNaRede;
-    }
-    
-    public void adicionarProcesso(Processo p){
-        processosNaRede.add(p);
-    }
-
-    public boolean isClient() {
-        return client;
-    }
-
-    public void setClient(boolean client) {
-        this.client = client;
-    }
-
-    public void setTracker(boolean tracker) {
-        this.tracker = tracker;
-    }    
-
     public int getId() {
         return id;
     }
+
+    public InetAddress getTrackerAddress() {
+        return trackerAddress;
+    }    
+    
            
     public boolean knowTracker(){
         return knowTracker;
     }       
     
-    public void eleicao(){
-        int idProcessoEleito = getProcessosNaRede().get(0).getId();
-
-        for (int i = 1; i < this.getProcessosNaRede().size(); i++) {
-            if (idProcessoEleito < getProcessosNaRede().get(i).getId()) {
-                idProcessoEleito = getProcessosNaRede().get(i).getId();
-            }
-        }
-
-        if (this.getId() == idProcessoEleito) {
-            tracker = true;
-            client = false;            
-        } else {
-            tracker = false;
-            client = true;
-        }
-        
-        knowTracker = true;
-        theTracker = idProcessoEleito;
-    }
-
     public Vector<String> getArquivosDoProcesso() {
         return arquivosDoProcesso;
     } 
 
-    public void setTheTracker(int theTracker){
-        this.theTracker = theTracker;
-        if(theTracker == id){
-            myTracker = new Tracker();
+    public void setTheTracker(int trackerID, InetAddress trackerAddress){
+        this.trackerID = trackerID;
+        this.trackerAddress = trackerAddress;
+        knowTracker = true;
+        if(trackerID == id){
+            myTracker = new Tracker(id);
         }
     }
     }

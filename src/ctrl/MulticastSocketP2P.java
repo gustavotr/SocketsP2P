@@ -16,11 +16,23 @@ import java.net.MulticastSocket;
  * @author a1097075
  */
 public class MulticastSocketP2P extends MulticastSocket{
-    
+    /**
+     * Endereco do Multicast
+     */
     private final String HOST = "229.10.10.100";
+    /**
+     * Timeout default do multicast
+     */
     private final int TIMEOUT = 20000;
-    private InetAddress group;
-    private int PORT = 5050;
+    /**
+     * InetAddres do multicast
+     */
+    private final InetAddress group;
+
+    /**
+     * Numero da porta usada pelo multicast
+     */
+    public static final int MULTICAST_PORT = 5050;
     
     public MulticastSocketP2P(int port) throws IOException {
         super(port);
@@ -36,10 +48,7 @@ public class MulticastSocketP2P extends MulticastSocket{
    public String getHOST() {
         return HOST;
     } 
-
-    public int getPORT() {
-        return PORT;
-    }
+    
     
     /**
      * Envia uma mensagem para o grupo multicast
@@ -49,7 +58,7 @@ public class MulticastSocketP2P extends MulticastSocket{
      */
     public void enviarMensagem(String msg) {  
         byte[] byteMsg = msg.getBytes();
-        DatagramPacket msgOut = new DatagramPacket(byteMsg, byteMsg.length, group, PORT);
+        DatagramPacket msgOut = new DatagramPacket(byteMsg, byteMsg.length, group, MULTICAST_PORT);
         try {            
             this.send(msgOut);    
         } catch (IOException e) {

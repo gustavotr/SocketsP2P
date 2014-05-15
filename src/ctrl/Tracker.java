@@ -7,6 +7,8 @@
 package ctrl;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,53 +21,90 @@ import model.Arquivo;
 public class Tracker extends Thread{
     
     private ArrayList<Arquivo> arquivosDoTracker;
-    private MulticastSocketP2P socketP2P;
-    private int PORT = 5050;
+    private MulticastSocketP2P multicastSocket;
+    private DatagramSocket socketUDP;
+    private int idTracker;
 
-    public Tracker() {
+    /**
+     * Numero da porta UDP do Tracker para receber requisicoes
+     */
+    public static final int UDPPort = 6066;
+    
+    /**
+     * Construtor do Tracker
+     * @param id recebe um int que e o id do processo que o gerou
+     */
+    public Tracker(int id) {
         try {
-            arquivosDoTracker = new ArrayList<Arquivo>();
-            socketP2P = new MulticastSocketP2P(PORT);
+            idTracker = id;
+            arquivosDoTracker = new ArrayList<>();
+            multicastSocket = new MulticastSocketP2P(MulticastSocketP2P.MULTICAST_PORT);
+            socketUDP  = new DatagramSocket(UDPPort);
+            TrackerHello trackerHello = new TrackerHello();
             this.start();
         } catch (IOException ex) {
             Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    
+    }       
     
     @Override
     public void run() {        
-        while (!socketP2P.isClosed()) { 
+        while (!multicastSocket.isClosed()) { 
             try {
-                System.out.println("\nTracker ativo!");
-                socketP2P.enviarMensagem("eu sou o tracker!");
-                this.sleep(5000);
-//                byte buf[] = new byte[1024];
-//                DatagramPacket pack = new DatagramPacket(buf, buf.length);
-//                socketP2P.receive(pack);
-//                String pergunta = new String(pack.getData());
-//                System.out.println("TRACKER RECEBEU -----> "+pergunta);
-////                System.out.println("Tracker recebeu de: " + pack.getAddress().toString()
-////                                    + ":" + pack.getPort() + " with length: "
-////                                    + pack.getLength());
-////                            System.out.println("Mensagem: ");
-////                            System.out.write(pack.getData(), 0, pack.getLength());
-//                //if (pergunta.equals("quem e o tracker?")){
-//                    System.out.println("Respondendo!!!!!!!");
-//                    String resposta = "eu sou o tracker";
-//                    byte[] byteMsg = resposta.getBytes();
-//                    DatagramPacket sendPacket = new DatagramPacket(byteMsg, byteMsg.length, socketP2P.getGroup(), socketP2P.getPORT());                    
-//                    socketP2P.send(pack);
-//                    System.out.println("ENVIOU!!!!!!!");
-//                }
-//            } catch (IOException ex) {                
-//                Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-            } catch (InterruptedException ex) {
+                byte buf[] = new byte[1024];
+                DatagramPacket pack = new DatagramPacket(buf, buf.length);                
+                socketUDP.receive(pack);
+                System.out.println("Tracker recebeu uma requisicao");
+                System.out.println(new String(pack.getData()));
+            } catch (IOException ex) {
                 Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
             }
        }
         
-    }
+    } 
     
+    //    public void eleicao(){
+//        int idProcessoEleito = getProcessosNaRede().get(0).getId();
+//
+//        for (int i = 1; i < this.getProcessosNaRede().size(); i++) {
+//            if (idProcessoEleito < getProcessosNaRede().get(i).getId()) {
+//                idProcessoEleito = getProcessosNaRede().get(i).getId();
+//            }
+//        }
+//
+//        if (this.getId() == idProcessoEleito) {
+//            tracker = true;
+//            client = false;            
+//        } else {
+//            tracker = false;
+//            client = true;
+//        }
+//        
+//        knowTracker = true;
+//        trackerID = idProcessoEleito;
+//    }
+    
+     public class TrackerHello extends Thread{
+
+        public TrackerHello() {
+            this.start();
+        }
+        
+         @Override
+        public void run() {        
+            while (!multicastSocket.isClosed()) { 
+                try {
+                    System.out.println("\nTracker ativo!");
+                    multicastSocket.enviarMensagem("eu sou o tracker!");
+                    this.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
+                }
+           }
+
+        }
+        
+    }
 }
+
+

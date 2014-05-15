@@ -2,29 +2,22 @@ package ctrl;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Processo;
-//import model.ServerRecebedorChave;
-//import util.Parameter;
-//import util.Serializer;
 
 public class MultiCastPeer extends Thread {
 
-    private MulticastSocketP2P socketP2P;
-    private int PORT = 5050;
+    private MulticastSocketP2P multicastSocket;
     private Processo processo;
     private boolean received;
-//   private boolean isPrivateKeyReceived = false;
-    private int contHelloEmMs = 0;
     private boolean isServerUp = true;
-    private ArrayList<Processo> processos;
 
-//    private boolean myTurn = false;
-//    private boolean enviaOuRecebeChave = true;
     /**
      * Construtora do Multicast por processo.
      *
@@ -33,22 +26,16 @@ public class MultiCastPeer extends Thread {
     public MultiCastPeer(Processo processo) {
         try {
             this.processo = processo;
-            socketP2P = new MulticastSocketP2P(PORT);
+            multicastSocket = new MulticastSocketP2P(MulticastSocketP2P.MULTICAST_PORT);
             this.start();
         } catch (IOException ex) {
             Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    @Override
-    /**
-     * Método que tem 3 partes: 1 - Inserção dos jogadores numa lista ordenada
-     * de cada 1 que após estar cheia, elege o servidor 2 - Caso o jogador seja
-     * o servidor, inicializa o server 3 - Caso o jogador seja cliente,
-     * inicializa o cliente
-     */
+    @Override    
     public void run() {        
-        while (!socketP2P.isClosed()) {
+        while (true) {
             if (!processo.knowTracker()) {
                 try {
                     /// Perguntar quem é o tracker
@@ -59,8 +46,8 @@ public class MultiCastPeer extends Thread {
                         byte buf[] = new byte[1024];
                         DatagramPacket pack = new DatagramPacket(buf, buf.length);                         
                         System.out.println("Esperando resposta");                        
-                        socketP2P.setSoTimeout(5000);
-                        socketP2P.receive(pack);
+                        multicastSocket.setSoTimeout(5000);
+                        multicastSocket.receive(pack);
                         String resposta = new String(pack.getData());                        
                         String respostaEsperada = to1024String("eu sou o tracker!");
                         if (respostaEsperada.equals(resposta)){
@@ -72,22 +59,33 @@ public class MultiCastPeer extends Thread {
                                     + pack.getLength());
                             System.out.println("Mensagem: ");
                             System.out.write(pack.getData(), 0, pack.getLength());
-                            System.out.println(""); 
-                            // And when we have finished receiving data leave the multicast group and
-                            // close the socket                            
+                            System.out.println("");                             
                         }
                     }
                 } catch (SocketTimeoutException e) {
-                    // timeout exception.
-                    System.out.println("Nenhum tracker respondeu");
-                    System.out.println("Eu serei o tracker");
-                    processo.setTheTracker(processo.getId());
-                    socketP2P.close();
+                    try {
+                        // timeout exception.
+                        System.out.println("Nenhum tracker respondeu");
+                        System.out.println("Eu serei o tracker");
+                        processo.setTheTracker(processo.getId(), InetAddress.getByName("localhost"));                        
+                    } catch (UnknownHostException ex) {
+                        Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }catch (IOException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }else{  //Sabe quem é o Tracker
-                
+            }else{  
+                try {
+                    //Sabe quem é o Tracker
+                    DatagramSocket socketUDP = new DatagramSocket();
+                    byte[] buf = "Essa é minha chave pública".getBytes();
+                    DatagramPacket pack = new DatagramPacket(buf, buf.length, processo.getTrackerAddress(), Tracker.UDPPort);
+                    socketUDP.send(pack);
+                } catch (SocketException ex) {
+                    Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -100,9 +98,9 @@ public class MultiCastPeer extends Thread {
      */
     private boolean isServerUP() {
         byte[] buffer = new byte[1024];
-        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, socketP2P.getGroup(), socketP2P.getPort());
+        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, multicastSocket.getGroup(), multicastSocket.getPort());
         try {
-            socketP2P.receive(msgIn);            
+            multicastSocket.receive(msgIn);            
             String mensagem = new String(msgIn.getData());
 
             if (mensagem.equals("hello")) {
@@ -113,8 +111,15 @@ public class MultiCastPeer extends Thread {
 
         }
         return false;
-    }    
-
+    }
+    
+    /**
+     * Converte uma String em uma String que ocupa 1024 bytes de um byte array
+     *
+     * @param str recebe uma String como parâmetro.
+     * 
+     * @return retorna a nova String
+     */
     private String to1024String(String str) {
         byte[] buf = new byte[1024];
         byte[] temp = str.getBytes();
