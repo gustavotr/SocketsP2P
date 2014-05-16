@@ -22,8 +22,8 @@ public class GUITelaInicialListener extends BaseListener {
         Component c = (Component) e.getSource();
         if (c.equals(panel.getButtonStart())) {
             String busca = panel.getBusca();
-            panel.changePanel(new GUILobby(panel.getMainFrame(), processo));
-            GUILobby.setBuscaRealizada(busca);
+            processo.buscarAquivo(busca);
+            panel.changePanel(new GUILobby(panel.getMainFrame(), processo, busca));
             panel.redimencionar(800, 600);
         }
     }

@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.MulticastSocketP2P;
 import model.Peer;
+import util.Funcoes;
 
 public class MultiCastPeer extends Thread {
 
@@ -34,7 +35,7 @@ public class MultiCastPeer extends Thread {
 
     @Override    
     /**
-     * Fica escutando o Multicast por novas mensagens
+     * Verifica se o Tracker esta online
      */
     public void run() {        
         while (true) {
@@ -47,8 +48,8 @@ public class MultiCastPeer extends Thread {
                     multicastSocket.setSoTimeout(5000);
                     multicastSocket.receive(pack);
                     String resposta = new String(pack.getData());
-                    System.out.println("MULTiCAST <- " + resposta);
-                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
+//                    System.out.println("MULTiCAST <- " + resposta);
+//                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
                     this.sleep(1000);
                 } catch(SocketTimeoutException ex){
                     System.out.println("Tracker caiu!");                    
@@ -99,7 +100,7 @@ public class MultiCastPeer extends Thread {
             
             //Testa se a mesnsagem recebida e de um peer novo
             
-            String respostaEsperada = to1024String("Peer id:");
+            String respostaEsperada = Funcoes.to1024String("Peer id:");
             String resposta = new String(pack.getData());
             
             if(resposta.substring(0,7).equals(respostaEsperada.substring(0,7))){                   
@@ -108,14 +109,14 @@ public class MultiCastPeer extends Thread {
                    Peer newPeer = new Peer(tempID,pack.getAddress(),pack.getPort());
                    peers.add(newPeer);
                    multicastSocket.enviarMensagem(peer);
-                   System.out.println("Novo peer: "+newPeer.getSettings());
+                   //System.out.println("Novo peer: "+newPeer.getSettings());
                }
             }
             
             //Testa se a mensagem recebida e de um tracker
             //caso o processo tenha sido adicionado depois de uma eleicao ja feita
             
-            respostaEsperada = to1024String("eu sou o tracker! ID:");
+            respostaEsperada = Funcoes.to1024String("eu sou o tracker! ID:");
             resposta = new String(pack.getData());
             
             if(resposta.substring(0,20).equals(respostaEsperada.substring(0, 20))){
@@ -128,7 +129,7 @@ public class MultiCastPeer extends Thread {
             
         }
         
-        System.out.println("Peers adicionados");
+        //System.out.println("Peers adicionados");
 
         Peer peerEleito = peers.get(0);
         int idProcessoEleito = peerEleito.getId(); 
@@ -146,20 +147,6 @@ public class MultiCastPeer extends Thread {
         return tracker;
     }
     
-    /**
-     * Converte uma String em uma String que ocupa 1024 bytes de um byte array
-     *
-     * @param str recebe uma String como parâmetro.
-     * 
-     * @return retorna a nova String
-     */
-    private String to1024String(String str) {
-        byte[] buf = new byte[1024];
-        byte[] temp = str.getBytes();
-        System.arraycopy(temp, 0, buf, 0, temp.length);
-        return new String(buf);        
-    }
-
     private boolean peersHasID(int tempID) {
         for(int i = 0; i < peers.size(); i++){
             if(peers.get(i).getId() == tempID){

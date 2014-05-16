@@ -23,7 +23,7 @@ public class MulticastSocketP2P extends MulticastSocket{
     /**
      * Timeout default do multicast
      */
-    private final int TIMEOUT = 20000;
+    private final int TIMEOUT = 10000;
     /**
      * InetAddres do multicast
      */

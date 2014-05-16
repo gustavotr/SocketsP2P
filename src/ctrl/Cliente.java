@@ -10,9 +10,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Random;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import util.Funcoes;
 
 /**
  *
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class Cliente extends Thread {
     
-    private DatagramSocket socketUDP; 
+    private DatagramSocket socketUnicast; 
     private Processo processo;
     private MultiCastPeer multi;
 
@@ -28,7 +29,7 @@ public class Cliente extends Thread {
         try {
             this.multi = multi;
             this.processo = processo;
-            socketUDP = new DatagramSocket();
+            socketUnicast = new DatagramSocket();
             this.start();
         } catch (SocketException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -37,7 +38,7 @@ public class Cliente extends Thread {
     
     @Override    
     /**
-     * Mantem Comunicacao UNICAST com o tracker
+     * Envia a lista atualizada de arquivos para o Tracke a cada 2 segundos
      */
     public void run() {        
         while (true) {
@@ -49,15 +50,26 @@ public class Cliente extends Thread {
                     String str = "Peer "+processo.getId()+" diz: oi tracker!"; 
                     byte[] buf = str.getBytes();
                     DatagramPacket pack = new DatagramPacket(buf, buf.length, processo.getTracker().getAddress(), Tracker.UDPPort);
-                    socketUDP.send(pack);
+                    socketUnicast.send(pack);
                     buf = new byte[1024];
                     pack = new DatagramPacket(buf, buf.length);
-                    socketUDP.receive(pack);
+                    socketUnicast.receive(pack);
                     String resposta = new String(pack.getData());
-                    System.out.println("UNICAST <- " + resposta);
-                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
-                    Random rnd = new Random();
-                    this.sleep(1000 + rnd.nextInt(5000));
+                    String respostaEsperada = Funcoes.to1024String("Request: getArquivos;");
+//                    System.out.println("UNICAST <- " + resposta);
+//                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
+                    if(resposta.equals(respostaEsperada)){
+                        Vector<String> arquivos = processo.getArquivosDoProcesso();
+                        for(int i = 0; i < arquivos.size(); i++){
+                            buf = arquivos.get(i).getBytes();
+                            pack = new DatagramPacket(buf, buf.length, pack.getAddress(), pack.getPort());
+                            socketUnicast.send(pack);
+                        }
+                    }
+                    buf = "fim dos arquivos".getBytes();
+                    pack = new DatagramPacket(buf, buf.length, pack.getAddress(), pack.getPort());
+                    socketUnicast.send(pack);
+                    this.sleep(2000);
                 } catch (SocketException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
