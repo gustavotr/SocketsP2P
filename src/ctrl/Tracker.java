@@ -50,13 +50,16 @@ public class Tracker extends Thread{
     
     @Override
     public void run() {        
-        while (!multicastSocket.isClosed()) { 
+        while (true) { 
             try {
                 byte buf[] = new byte[1024];
                 DatagramPacket pack = new DatagramPacket(buf, buf.length);                
                 socketUDP.receive(pack);
-                System.out.println("UNICAST <- " + new String(pack.getData()));
-                buf = "oi peer".getBytes();
+                String resposta = new String(pack.getData());
+                System.out.println("UNICAST <- " + resposta);  
+                System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
+                String saudacao = "oi peer " + resposta.substring(5,7);
+                buf = saudacao.getBytes();
                 pack = new DatagramPacket(buf, buf.length, pack.getAddress(), pack.getPort());
                 socketUDP.send(pack);
             } catch (IOException ex) {
@@ -78,7 +81,7 @@ public class Tracker extends Thread{
             while (!multicastSocket.isClosed()) { 
                 try {
                     System.out.println("\nTracker ativo!");
-                    multicastSocket.enviarMensagem("eu sou o tracker!");
+                    multicastSocket.enviarMensagem("eu sou o tracker! ID:"+idTracker);
                     this.sleep(5000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);

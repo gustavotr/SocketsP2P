@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-package model;
+package ctrl;
 
-import ctrl.Tracker;
 import java.io.File;
 import java.util.Random;
 import java.util.Vector;
+import model.Peer;
 
 /**
  *
@@ -75,4 +75,12 @@ public class Processo {
         
         cliente = new Cliente(multi, this);
     }   
+    
+    /**
+     * Funcao chamada quando o traquer cai
+     * irá desvincular o tracker que caiu para que haja uma nova eleicao
+     */
+    public void setNoTracker() {
+        knowTracker = false;
+    }
 }

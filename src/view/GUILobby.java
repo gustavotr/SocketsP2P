@@ -8,7 +8,7 @@ import javax.swing.JList;
 import javax.swing.SwingConstants;
 import listener.BaseListener;
 import listener.GUILobbyListener;
-import model.Processo;
+import ctrl.Processo;
 
 public class GUILobby extends BasePanel {
 

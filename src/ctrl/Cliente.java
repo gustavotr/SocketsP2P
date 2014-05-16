@@ -4,13 +4,13 @@
  * and open the template in the editor.
  */
 
-package model;
+package ctrl;
 
-import ctrl.Tracker;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,14 +36,17 @@ public class Cliente extends Thread {
     }
     
     @Override    
+    /**
+     * Mantem Comunicacao UNICAST com o tracker
+     */
     public void run() {        
         while (true) {
             if (!processo.knowTracker()) {
-                multi.eleicao();
+                System.out.println(multi.eleicao());
             }else{  
                 try {
                     //Sabe quem é o Tracker                    
-                    String str = "Peer "+processo.getId()+" diz oi tracker!"; 
+                    String str = "Peer "+processo.getId()+" diz: oi tracker!"; 
                     byte[] buf = str.getBytes();
                     DatagramPacket pack = new DatagramPacket(buf, buf.length, processo.getTracker().getAddress(), Tracker.UDPPort);
                     socketUDP.send(pack);
@@ -51,8 +54,10 @@ public class Cliente extends Thread {
                     pack = new DatagramPacket(buf, buf.length);
                     socketUDP.receive(pack);
                     String resposta = new String(pack.getData());
-                    System.out.println("UNICAST <- "+resposta);
-                    this.sleep(1000);
+                    System.out.println("UNICAST <- " + resposta);
+                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
+                    Random rnd = new Random();
+                    this.sleep(1000 + rnd.nextInt(5000));
                 } catch (SocketException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {

@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import listener.BaseListener;
 import listener.GUITelaInicialListener;
-import model.Processo;
+import ctrl.Processo;
 import util.GUIConstants;
 
 public class GUITelaInicial extends BasePanel implements Runnable{

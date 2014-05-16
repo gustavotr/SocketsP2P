@@ -1,4 +1,4 @@
-package model;
+package ctrl;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -7,6 +7,8 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.MulticastSocketP2P;
+import model.Peer;
 
 public class MultiCastPeer extends Thread {
 
@@ -22,7 +24,8 @@ public class MultiCastPeer extends Thread {
     public MultiCastPeer(Processo processo) {
         try {
             this.processo = processo;
-            multicastSocket = new MulticastSocketP2P(); 
+            multicastSocket = new MulticastSocketP2P();
+            System.out.println("Meu ID: "+processo.getId());
             this.start();
         } catch (IOException ex) {
             Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
@@ -30,21 +33,26 @@ public class MultiCastPeer extends Thread {
     }
 
     @Override    
+    /**
+     * Fica escutando o Multicast por novas mensagens
+     */
     public void run() {        
         while (true) {
             if (!processo.knowTracker()) {
-                eleicao();
+                System.out.println(eleicao());
             }else{  
                 try {                                        
                     byte[] buf = new byte[1024];
                     DatagramPacket pack = new DatagramPacket(buf, buf.length);
-                    multicastSocket.setSoTimeout(1000);
+                    multicastSocket.setSoTimeout(5000);
                     multicastSocket.receive(pack);
                     String resposta = new String(pack.getData());
-                    System.out.println("MULTICAST <- "+resposta);
+                    System.out.println("MULTiCAST <- " + resposta);
+                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
                     this.sleep(1000);
                 } catch(SocketTimeoutException ex){
                     System.out.println("Tracker caiu!");                    
+                    processo.setNoTracker();
                 }catch (SocketException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
@@ -61,22 +69,35 @@ public class MultiCastPeer extends Thread {
     }
     
     public String eleicao(){
+        return eleicao(4);
+    }
+    
+    /**
+     * Funcao que aguarda a conexao de 4 peers
+     * e faz uma eleicao para saber quem sera o tracker
+     * @return uma string com os dados do tracker eleito
+     */
+    public String eleicao(int peersConnected){
         
         peers = new ArrayList<>();
         
         String peer = "Peer id:"+processo.getId();
         multicastSocket.enviarMensagem(peer);
         
-        while(peers.size() < 4){
+        while(peers.size() < peersConnected){
             
             byte[] buff = new byte[1024];
             DatagramPacket pack = new DatagramPacket(buff, buff.length);
             
             try {
                 multicastSocket.receive(pack);
-            } catch (IOException ex) {
+            }catch (SocketTimeoutException ex){
+                return eleicao(peers.size());
+            }catch (IOException ex) {
                 Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            //Testa se a mesnsagem recebida e de um peer novo
             
             String respostaEsperada = to1024String("Peer id:");
             String resposta = new String(pack.getData());
@@ -90,6 +111,21 @@ public class MultiCastPeer extends Thread {
                    System.out.println("Novo peer: "+newPeer.getSettings());
                }
             }
+            
+            //Testa se a mensagem recebida e de um tracker
+            //caso o processo tenha sido adicionado depois de uma eleicao ja feita
+            
+            respostaEsperada = to1024String("eu sou o tracker! ID:");
+            resposta = new String(pack.getData());
+            
+            if(resposta.substring(0,20).equals(respostaEsperada.substring(0, 20))){
+                int tempID = Integer.parseInt(resposta.substring(21,23));
+                Peer tempPeer = new Peer(tempID, pack.getAddress(), pack.getPort());
+                processo.setTheTracker(tempPeer);
+                return "Tracker("+tempPeer.getSettings()+")";
+            }
+            
+            
         }
         
         System.out.println("Peers adicionados");

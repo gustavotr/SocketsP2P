@@ -2,7 +2,7 @@ package listener;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import model.Processo;
+import ctrl.Processo;
 
 import view.GUILobby;
 import view.GUITelaInicial;
