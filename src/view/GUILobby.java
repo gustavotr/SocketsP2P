@@ -49,9 +49,4 @@ public class GUILobby extends BasePanel {
         result.setBounds(20, 100, getWidth() - 50, getHeight() - 150);
         this.add(result);
     }
-
-      public Processo getProcesso() {
-        return processo;
-    }
-
 }

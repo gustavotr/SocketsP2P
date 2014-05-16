@@ -1,10 +1,9 @@
 package model;
 
-import ctrl.Tracker;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +23,6 @@ public class MultiCastPeer extends Thread {
         try {
             this.processo = processo;
             multicastSocket = new MulticastSocketP2P(); 
-            System.out.println(eleicao());
             this.start();
         } catch (IOException ex) {
             Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
@@ -40,11 +38,14 @@ public class MultiCastPeer extends Thread {
                 try {                                        
                     byte[] buf = new byte[1024];
                     DatagramPacket pack = new DatagramPacket(buf, buf.length);
+                    multicastSocket.setSoTimeout(1000);
                     multicastSocket.receive(pack);
                     String resposta = new String(pack.getData());
                     System.out.println("MULTICAST <- "+resposta);
                     this.sleep(1000);
-                } catch (SocketException ex) {
+                } catch(SocketTimeoutException ex){
+                    System.out.println("Tracker caiu!");                    
+                }catch (SocketException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
                     Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
