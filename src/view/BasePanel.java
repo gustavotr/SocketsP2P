@@ -1,6 +1,8 @@
 package view;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -28,6 +30,11 @@ public class BasePanel extends JPanel {
         mainFrame.remove(this);
         mainFrame.add(newPanel);
         this.refreshView();
+    }
+    public void redimencionar(int width, int hegiht){
+        mainFrame.setSize(width, hegiht);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        mainFrame.setLocation(dim.width / 2 - width / 2, dim.height / 2 - hegiht / 2);      
     }
 
     public void refreshView() {

@@ -3,7 +3,7 @@ package listener;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
-import model.Processo;
+import ctrl.Processo;
 import view.GUILobby;
 
 public class GUILobbyListener extends BaseListener {
@@ -12,6 +12,7 @@ public class GUILobbyListener extends BaseListener {
 
     public GUILobbyListener(GUILobby panel) {
         this.panel = panel;
+        
     }
 
     @Override

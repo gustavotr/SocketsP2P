@@ -4,7 +4,7 @@ import view.MainFrame;
 
 
 public class Main {
-
+    
 	/**
 	 * @param args
 	 */

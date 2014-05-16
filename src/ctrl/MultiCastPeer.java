@@ -2,235 +2,170 @@ package ctrl;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
-
-import model.Client;
-import model.Processo;
-import model.Server;
-import util.Parameter;
-import util.Serializer;
-//import model.ServerRecebedorChave;
-//import util.Parameter;
-//import util.Serializer;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.MulticastSocketP2P;
+import model.Peer;
 
 public class MultiCastPeer extends Thread {
 
-    private static final long serialVersionUID = 1L;
-    private final String HOST = "229.10.10.100";
-    private final int PORT = 5050;
-    private final int TIMEOUT = 20000;
-    private String usuario;
-    private MulticastSocket socket;
-    private InetAddress group;
+    private MulticastSocketP2P multicastSocket;    
     private Processo processo;
-//   private boolean isPrivateKeyReceived = false;
-    private int contHelloEmMs = 0;
-    private boolean isServerUp = true;
-
-//    private boolean myTurn = false;
-//    private boolean enviaOuRecebeChave = true;
+    private ArrayList<Peer> peers;
 
     /**
-     * Construtora do Multicast por processo. 
+     * Construtora do Multicast por processo.
+     *
      * @param processo Recebe o processo como parâmetro.
      */
     public MultiCastPeer(Processo processo) {
         try {
             this.processo = processo;
-            group = InetAddress.getByName(HOST);
-            socket = new MulticastSocket(PORT);
-            socket.setSoTimeout(TIMEOUT);
-            socket.joinGroup(group);
+            multicastSocket = new MulticastSocketP2P();
+            System.out.println("Meu ID: "+processo.getId());
             this.start();
-        } catch (UnknownHostException e) {
-            System.out.println("Erro no host: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            System.out.println("Erro I/O: " + e.getLocalizedMessage());
+        } catch (IOException ex) {
+            Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    @Override
+    @Override    
     /**
-     * Método que tem 3 partes:
-     * 1 - Inserção dos jogadores numa lista ordenada de cada 1 que após estar cheia, elege o servidor
-     * 2 - Caso o jogador seja o servidor, inicializa o server
-     * 3 - Caso o jogador seja cliente, inicializa o cliente
+     * Fica escutando o Multicast por novas mensagens
      */
-    public void run() {
-        while (!socket.isClosed()) {
-
-            if (this.processo.getListaProcessos().size() < 4) {
-                //this.adicionarProcesso();
-            } else {
-                if (!processo.isClient() && !processo.isServer()) {
-                    processo.eleicao();
-                }
-
-                if (processo.isServer()) {
-                    //inicializarServidorUDP();
-                }
-
-                if (processo.isClient()) {
-                    inicializarClienteUDP();
+    public void run() {        
+        while (true) {
+            if (!processo.knowTracker()) {
+                System.out.println(eleicao());
+            }else{  
+                try {                                        
+                    byte[] buf = new byte[1024];
+                    DatagramPacket pack = new DatagramPacket(buf, buf.length);
+                    multicastSocket.setSoTimeout(5000);
+                    multicastSocket.receive(pack);
+                    String resposta = new String(pack.getData());
+                    System.out.println("MULTiCAST <- " + resposta);
+                    System.out.println( new String("\tFrom: " + pack.getAddress().getHostAddress() + ":" + pack.getPort()) );
+                    this.sleep(1000);
+                } catch(SocketTimeoutException ex){
+                    System.out.println("Tracker caiu!");                    
+                    processo.setNoTracker();
+                }catch (SocketException ex) {
+                    Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
     }
 
+    public Processo getProcesso() {
+        return processo;
+    }
+    
+    public String eleicao(){
+        return eleicao(4);
+    }
     
     /**
-     * Método que inicializa o Cliente do jogo, criando inicialmente uma conexão unicast UDP para receber a chave Publica dele.
+     * Funcao que aguarda a conexao de 4 peers
+     * e faz uma eleicao para saber quem sera o tracker
+     * @return uma string com os dados do tracker eleito
+     */
+    public String eleicao(int peersConnected){
+        
+        peers = new ArrayList<>();
+        
+        String peer = "Peer id:"+processo.getId();
+        multicastSocket.enviarMensagem(peer);
+        
+        while(peers.size() < peersConnected){
+            
+            byte[] buff = new byte[1024];
+            DatagramPacket pack = new DatagramPacket(buff, buff.length);
+            
+            try {
+                multicastSocket.receive(pack);
+            }catch (SocketTimeoutException ex){
+                return eleicao(peers.size());
+            }catch (IOException ex) {
+                Logger.getLogger(MultiCastPeer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            //Testa se a mesnsagem recebida e de um peer novo
+            
+            String respostaEsperada = to1024String("Peer id:");
+            String resposta = new String(pack.getData());
+            
+            if(resposta.substring(0,7).equals(respostaEsperada.substring(0,7))){                   
+               int tempID = Integer.parseInt(resposta.substring(8,10));               
+               if(!peersHasID(tempID)){
+                   Peer newPeer = new Peer(tempID,pack.getAddress(),pack.getPort());
+                   peers.add(newPeer);
+                   multicastSocket.enviarMensagem(peer);
+                   System.out.println("Novo peer: "+newPeer.getSettings());
+               }
+            }
+            
+            //Testa se a mensagem recebida e de um tracker
+            //caso o processo tenha sido adicionado depois de uma eleicao ja feita
+            
+            respostaEsperada = to1024String("eu sou o tracker! ID:");
+            resposta = new String(pack.getData());
+            
+            if(resposta.substring(0,20).equals(respostaEsperada.substring(0, 20))){
+                int tempID = Integer.parseInt(resposta.substring(21,23));
+                Peer tempPeer = new Peer(tempID, pack.getAddress(), pack.getPort());
+                processo.setTheTracker(tempPeer);
+                return "Tracker("+tempPeer.getSettings()+")";
+            }
+            
+            
+        }
+        
+        System.out.println("Peers adicionados");
+
+        Peer peerEleito = peers.get(0);
+        int idProcessoEleito = peerEleito.getId(); 
+
+        for (int i = 1; i < this.peers.size(); i++) {
+            if (idProcessoEleito < peers.get(i).getId()) {
+                peerEleito = peers.get(i);
+                idProcessoEleito = peerEleito.getId();               
+            }
+        }
+
+        processo.setTheTracker(peerEleito);
+        String tracker = "Tracker("+peerEleito.getSettings()+")";
+
+        return tracker;
+    }
+    
+    /**
+     * Converte uma String em uma String que ocupa 1024 bytes de um byte array
+     *
+     * @param str recebe uma String como parâmetro.
      * 
+     * @return retorna a nova String
      */
-    private synchronized void inicializarClienteUDP() {
-        // loop do jogo
-        Client c = processo.getClient();
-
-        // verifica se o server estiver UP ainda após Delta T1.
-        if ((contHelloEmMs >= Parameter.DELTA_T1_SERVER_MANDAR_HELLO)) {
-
-            // verifica se o server está online
-            isServerUp = isServerUP();
-            if (!isServerUp) {
-                // se não estiver, limpa a lista
-                processo.getListaProcessos().clear();
-            }
-            contHelloEmMs = 0;
-        } else {
-            if (isServerUp) {
-                //inicializa servidor UDP para receber as chaves do server do jogo
-                
-
-            }
-        }
-
-        try {
-            sleep(50);
-            contHelloEmMs += 50;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private String to1024String(String str) {
+        byte[] buf = new byte[1024];
+        byte[] temp = str.getBytes();
+        System.arraycopy(temp, 0, buf, 0, temp.length);
+        return new String(buf);        
     }
 
-    
-    /**
-     * Método que verifica se recebeu a mensagem de hello via multicast
-     * @return true caso tenha recebido a mensagem de hello e false caso contrário
-     */
-    private boolean isServerUP() {
-        byte[] buffer = new byte[1024];
-        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, group, PORT);
-        try {
-            // this.enviarMensagem(jogador.sendInfo());
-            socket.receive(msgIn);
-            String mensagem = new String(msgIn.getData());
-
-            if (mensagem.equals("hello")) {
+    private boolean peersHasID(int tempID) {
+        for(int i = 0; i < peers.size(); i++){
+            if(peers.get(i).getId() == tempID){
                 return true;
             }
-            // sleep(50);
-        } catch (Exception e) {
-
         }
         return false;
     }
-
-    /**
-     * Método que envia as chaves publicas aos clientes e após inicializa o servidor
-     */
-//    private void inicializarServidorUDP() {
-//
-//        if (enviaOuRecebeChave) {
-//            try {
-//                //	    		for(int i=0; i<20; i++)
-//                {
-//                    ClienteSenderChave csc = new ClienteSenderChave(jogador, jogador.getServer());
-//                    sleep(1750);
-//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(0).getId())) {
-//                        csc.enviaChavePublica(jogador.getListaJogadores().get(0).getPorta(), 0);
-//                        sleep(500);
-//                    }
-//
-//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(1).getId())) {
-//                        csc.enviaChavePublica(jogador.getListaJogadores().get(1).getPorta(), 1);
-//                        sleep(500);
-//                    }
-//
-//                    if (!jogador.getServer().getcPublicas().containsKey(jogador.getListaJogadores().get(2).getId())) {
-//                        csc.enviaChavePublica(jogador.getListaJogadores().get(2).getPorta(), 2);
-//                        sleep(500);
-//                    }
-//
-//                    for (Jogador j : jogador.getListaJogadores()) {
-//                        if (!jogador.getServer().getcPublicas().containsKey(j.getId())) {
-//                            enviaOuRecebeChave = true;
-//                            break;
-//                        }
-//                    }
-//                    enviaOuRecebeChave = false;
-//                }
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//
-//        } else {
-//
-//            // começa o server udp
-//            jogador.getServer().startJogo();
-//
-//        }
-
-//    }
-
-    /**
-     * Envia uma mensagem para o grupo multicast
-     * 
-     * @param String
-     *            msg
-     */
-    public void enviarMensagem(byte[] msg) {
-        DatagramPacket msgOut = new DatagramPacket(msg, msg.length, group, PORT);
-        try {
-            socket.send(msgOut);
-        } catch (IOException e) {
-            System.out.println("Erro I/O: " + e.getLocalizedMessage());
-        }
-    }
-
-    /**
-     * Método responsável por limpar o buffer de dados
-     * 
-     * @param byte [] buffer
-     */
-    private void cleanBuffer(byte[] buffer) {
-        for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = 0;
-        }
-    }
-
-   
-    private void adicionarProcessos() {
-        byte[] buffer = new byte[1024];
-        DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length, group, PORT);
-        try {
-            this.enviarMensagem(processo.sendId());
-            socket.receive(msgIn);
-            Object o = Serializer.deserialize(msgIn.getData());
-            if (o instanceof Processo) {
-                processo.addProcesso((Processo) o);
-            }
-            sleep(1250);
-            // enviarMensagem("Recebido por " + usuario);
-        } catch (IOException e) {
-            System.out.println("Erro I/O: " + e.getLocalizedMessage());
-        } catch (ClassNotFoundException ex) {
-            System.out.println("Erro Serializacao: " + ex.getLocalizedMessage());
-        } catch (InterruptedException ex) {
-            System.out.println("Erro sleep: " + ex.getLocalizedMessage());
-        } finally {
-            cleanBuffer(buffer);
-        }
-    }  
 }
