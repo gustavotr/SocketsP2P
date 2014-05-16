@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Arquivo;
 import model.MulticastSocketP2P;
+import model.Peer;
 import util.Funcoes;
 
 /**
@@ -83,11 +84,41 @@ public class Tracker extends Thread{
                         SendAquivosDoTracker uni = new SendAquivosDoTracker(busca, add, port, arquivosDoTracker);
                     }
                 }
+                respostaEsperada = Funcoes.to1024String("Request: arquivo(");                
+                if(resposta.substring(0,16).equals(respostaEsperada.substring(0,16))){
+                    String busca = resposta.substring(17, resposta.lastIndexOf(')') ); 
+                    if(port != Tracker.UDPPort){
+                        Peer peer = getFileLocation(busca);
+                        String location = new String(peer.getAddress().getHostAddress() + ":" + peer.getPort());
+                        buf = location.getBytes();
+                        DatagramSocket socket = new DatagramSocket();
+                        pack = new DatagramPacket(buf, buf.length, add, port);
+                        socket.send(pack);
+                    }
+                }
             } catch (IOException ex) {
                 Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
             }
        }
         
+    }
+
+    private Peer getFileLocation(String busca) {
+        Peer peer = null;
+        for(int i = 0; i < arquivosDoTracker.size(); i++){   
+            Arquivo temp = arquivosDoTracker.get(i);
+            String nome = temp.getNome();
+            nome = nome.substring(0, 4+nome.lastIndexOf(".") );
+            if(nome.equals(busca)){
+                for(int j = 0; j < MultiCastPeer.getPeers().size(); j++){
+                    if(MultiCastPeer.getPeers().get(j).getId() == arquivosDoTracker.get(i).getProcessos().get(0)){
+                        peer = MultiCastPeer.getPeers().get(j);
+                        return peer;
+                    }
+                }
+            }
+        }
+        return peer;
     }
  
      public class TrackerHello extends Thread{
@@ -110,6 +141,7 @@ public class Tracker extends Thread{
                     Logger.getLogger(Tracker.class.getName()).log(Level.SEVERE, null, ex);
                 }
            }
+           Thread.currentThread().interrupt();
 
         }
         

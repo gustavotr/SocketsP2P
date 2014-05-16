@@ -70,6 +70,7 @@ class SendAquivosDoTracker implements Runnable{
             pack = new DatagramPacket(buf, buf.length, address, port);
             socketUnicast.send(pack);
             socketUnicast.close();
+            Thread.currentThread().interrupt();
             //System.out.println("Terminou UNICAST");
         } catch (IOException ex) {
             Logger.getLogger(GetAquivosDoPeer.class.getName()).log(Level.SEVERE, null, ex);

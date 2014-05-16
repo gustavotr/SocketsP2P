@@ -15,7 +15,6 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Arquivo;
 import model.Peer;
 import util.Funcoes;
 
@@ -131,7 +130,7 @@ public class Processo implements Runnable{
             }
             socket.close();
             //System.out.println("Terminou Busca");
-            
+            Thread.currentThread().interrupt();
         } catch (SocketException ex) {
             Logger.getLogger(Processo.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

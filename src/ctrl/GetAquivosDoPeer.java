@@ -21,7 +21,7 @@ import util.Funcoes;
  *
  * @author Gustavo
  */
-public class GetAquivosDoPeer implements Runnable {
+public class GetAquivosDoPeer extends Thread {
     
     private String msg;
     private InetAddress address;
@@ -39,7 +39,7 @@ public class GetAquivosDoPeer implements Runnable {
             this.arquivosDoTracker = array;
             this.socketUnicast = new DatagramSocket();
             //System.out.println("Comecou UNICAST");
-            new Thread(this).start();
+            this.start();
         } catch (SocketException ex) {
             Logger.getLogger(GetAquivosDoPeer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -69,12 +69,13 @@ public class GetAquivosDoPeer implements Runnable {
                 }
                 
             }
-            socketUnicast.close();
+            socketUnicast.close();            
             //System.out.println("Terminou UNICAST");
             for(int i = 0; i < arquivosDoTracker.size(); i++){
                 System.out.print(arquivosDoTracker.get(i).getNome());
                 System.out.println(arquivosDoTracker.get(i).getProcessos().toString());
             }
+            this.interrupt();
         } catch (IOException ex) {
             Logger.getLogger(GetAquivosDoPeer.class.getName()).log(Level.SEVERE, null, ex);
         }

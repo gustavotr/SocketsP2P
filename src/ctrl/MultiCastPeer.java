@@ -14,8 +14,8 @@ import util.Funcoes;
 public class MultiCastPeer extends Thread {
 
     private MulticastSocketP2P multicastSocket;    
-    private Processo processo;
-    private ArrayList<Peer> peers;
+    private static Processo processo;
+    private static ArrayList<Peer> peers;
 
     /**
      * Construtora do Multicast por processo.
@@ -72,7 +72,12 @@ public class MultiCastPeer extends Thread {
     public String eleicao(){
         return eleicao(4);
     }
+
+    public static ArrayList<Peer> getPeers() {
+        return peers;
+    }
     
+        
     /**
      * Funcao que aguarda a conexao de 4 peers
      * e faz uma eleicao para saber quem sera o tracker
