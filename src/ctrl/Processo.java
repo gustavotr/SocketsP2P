@@ -40,6 +40,7 @@ public class Processo implements Runnable{
         id = 10 + rnd.nextInt(89);
         knowTracker = false;        
         this.folderPath = "src/arquivos/processo"+(rnd.nextInt(4)+1);                       
+        System.out.println("My folder: "+folderPath);
         setArquivos();
         multi = new MultiCastPeer(this);        
     }
@@ -54,7 +55,7 @@ public class Processo implements Runnable{
         File[] listOfFiles = folder.listFiles();
         
             for(int i = 0; i < listOfFiles.length; i++){
-                arquivosDoProcesso.add(listOfFiles[i].getName());
+                arquivosDoProcesso.add(folderPath + "/" + listOfFiles[i].getName());
             }
     }
     
@@ -92,6 +93,12 @@ public class Processo implements Runnable{
     public void setNoTracker() {
         knowTracker = false;
     }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+    
+    
 
     public Vector<String> buscarAquivo(String search) {
         stringBuscada = search;

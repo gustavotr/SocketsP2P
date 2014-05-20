@@ -3,9 +3,11 @@ package view;
 import ctrl.Processo;
 import ctrl.Tracker;
 import java.awt.Font;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -17,7 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import listener.BaseListener;
-import listener.GUILobbyListener;
+
 
 public class GUILobby extends BasePanel {
 
@@ -35,8 +37,7 @@ public class GUILobby extends BasePanel {
         super(mainFrame);
         this.mainFrame = mainFrame;
         this.processo = processo;
-        this.busca = busca;
-        listener = new GUILobbyListener(this);
+        this.busca = busca;        
         panelWidth = 800;
         panelHeight = 600;
         this.setSize(panelWidth, panelHeight);
@@ -61,9 +62,9 @@ public class GUILobby extends BasePanel {
             public void valueChanged(ListSelectionEvent e) {
                 if(!e.getValueIsAdjusting()){
                     try {
-                        String value = result.getSelectedValue().toString();
-                        value = value.substring(0, 4+value.lastIndexOf(".") );
-                        String str = "Request: arquivo(".concat(value).concat(")");                        
+                        String fileName = result.getSelectedValue().toString();
+                        fileName = fileName.substring(0, 4+fileName.lastIndexOf(".") );
+                        String str = "Request: arquivo(".concat(fileName).concat(")");                        
                         byte[] buf = str.getBytes();
                         DatagramSocket socket = new DatagramSocket();
                         DatagramPacket pack = new DatagramPacket(buf, buf.length, processo.getTracker().getAddress(), Tracker.UDPPort);
@@ -71,8 +72,12 @@ public class GUILobby extends BasePanel {
                         buf = new byte[1024];
                         pack = new DatagramPacket(buf, buf.length);
                         socket.receive(pack);
+                        fileName = fileName.substring(22);
+                        FileOutputStream fos = new FileOutputStream(processo.getFolderPath() + "/" + fileName);
+                        fos.write(buf);
+                        fos.close();
                         //Imprime a localizacao do arquivo requerido
-                        System.out.println(new String(pack.getData()));
+                        //System.out.println(new String(pack.getData()));
                     } catch (SocketException ex) {
                         Logger.getLogger(GUILobby.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ex) {

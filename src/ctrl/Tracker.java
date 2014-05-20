@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,9 +91,11 @@ public class Tracker extends Thread{
                 if(resposta.substring(0,16).equals(respostaEsperada.substring(0,16))){
                     String busca = resposta.substring(17, resposta.lastIndexOf(')') ); 
                     if(port != Tracker.UDPPort){
-                        Peer peer = getFileLocation(busca);
-                        String location = new String(peer.getAddress().getHostAddress() + ":" + peer.getPort());
-                        buf = location.getBytes();
+                        //Peer peer = getFileLocation(busca);
+                        //String location = new String(peer.getAddress().getHostAddress() + ":" + peer.getPort());
+                        Path path = Paths.get(busca);
+                        byte[] data = Files.readAllBytes(path);
+                        buf = data;
                         DatagramSocket socket = new DatagramSocket();
                         pack = new DatagramPacket(buf, buf.length, add, port);
                         socket.send(pack);

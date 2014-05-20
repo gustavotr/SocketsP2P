@@ -71,10 +71,10 @@ public class GetAquivosDoPeer extends Thread {
             }
             socketUnicast.close();            
             //System.out.println("Terminou UNICAST");
-            for(int i = 0; i < arquivosDoTracker.size(); i++){
-                System.out.print(arquivosDoTracker.get(i).getNome());
-                System.out.println(arquivosDoTracker.get(i).getProcessos().toString());
-            }
+//            for(int i = 0; i < arquivosDoTracker.size(); i++){
+//                System.out.print(arquivosDoTracker.get(i).getNome());
+//                System.out.println(arquivosDoTracker.get(i).getProcessos().toString());
+//            }
             this.interrupt();
         } catch (IOException ex) {
             Logger.getLogger(GetAquivosDoPeer.class.getName()).log(Level.SEVERE, null, ex);
