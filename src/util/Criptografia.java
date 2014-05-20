@@ -10,7 +10,7 @@ import javax.crypto.Cipher;
 
 public class Criptografia {
 
-    private final static String ALGORITMO = "RSA/ECB/NoPadding";
+    private final static String ALGORITMO = "RSA";
 
     /**
      * Retorna um KeyPair. KeyPair.getPrivate() recupera a chave privada e
@@ -23,7 +23,7 @@ public class Criptografia {
         try {
             final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITMO);
             final SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(128, random);
+            keyGen.initialize(1024, random);
 //            keyGen.initialize(2048, random);
             pair = keyGen.generateKeyPair();
         } catch (Exception e) {

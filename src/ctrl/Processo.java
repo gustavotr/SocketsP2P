@@ -59,14 +59,22 @@ public class Processo implements Runnable{
             }
     }
     
-    
+    /**
+     * Retorna o id do processo
+     * @return Um int correspondendo ao id do processo
+     */
     public int getId() {
         return id;
     } 
-           
+    
+    /**
+     * 
+     * @return true se o Tracker e conhecido pelo processo
+     */
     public boolean knowTracker(){
         return knowTracker;
     }       
+    
     
     public Vector<String> getArquivosDoProcesso() {
         return arquivosDoProcesso;
@@ -76,6 +84,10 @@ public class Processo implements Runnable{
         return tracker;
     }
     
+    /**
+     * Atribui um tracker ao processo
+     * @param peer 
+     */
     public void setTheTracker(Peer peer){
         this.tracker = peer;        
         knowTracker = true;
@@ -93,7 +105,7 @@ public class Processo implements Runnable{
     public void setNoTracker() {
         knowTracker = false;
     }
-
+    
     public String getFolderPath() {
         return folderPath;
     }
